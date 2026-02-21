@@ -1,6 +1,6 @@
 # career-guidance-ml" 
 ## Tasks
-- [ ] add CS/IT column
+- [x] add CS/IT column
 - [ ] add logic for value range `marks= 0-100 `
 - [ ] drom name column `privacy`
 - [ ] add career column `for supervised ml model`

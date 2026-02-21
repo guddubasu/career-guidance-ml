@@ -1,11 +1,12 @@
 import argparse
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from clean_required_columns import NUMERIC_COLUMNS, clean_dataset
+from clean_required_cols import NUMERIC_COLUMNS, clean_dataset
 
 
 sns.set_theme(style="whitegrid")
@@ -36,7 +37,7 @@ def save_descriptive_stats(df: pd.DataFrame, out_dir: Path) -> None:
 
 
 def plot_missing_heatmap(df: pd.DataFrame, out_dir: Path) -> None:
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(11, 5))
     sns.heatmap(df[NUMERIC_COLUMNS].isna(), cbar=False, yticklabels=False)
     plt.title("Missing Value Pattern (Required Numeric Columns)")
     plt.xlabel("Columns")
@@ -47,10 +48,18 @@ def plot_missing_heatmap(df: pd.DataFrame, out_dir: Path) -> None:
 
 
 def plot_distribution_grid(df: pd.DataFrame, out_dir: Path) -> None:
-    fig, axes = plt.subplots(2, 4, figsize=(18, 8))
-    for ax, col in zip(axes.flatten(), NUMERIC_COLUMNS):
-        sns.histplot(df[col], kde=True, ax=ax, bins=20)
-        ax.set_title(f"Distribution: {col}")
+    cols = 3
+    rows = math.ceil(len(NUMERIC_COLUMNS) / cols)
+    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 4 * rows))
+    axes = axes.flatten()
+
+    for idx, col in enumerate(NUMERIC_COLUMNS):
+        sns.histplot(df[col], kde=True, ax=axes[idx], bins=20)
+        axes[idx].set_title(f"Distribution: {col}")
+
+    for idx in range(len(NUMERIC_COLUMNS), len(axes)):
+        axes[idx].axis("off")
+
     fig.tight_layout()
     fig.savefig(out_dir / "numeric_distributions.png", dpi=180)
     plt.close(fig)
@@ -58,7 +67,7 @@ def plot_distribution_grid(df: pd.DataFrame, out_dir: Path) -> None:
 
 def plot_correlation(df: pd.DataFrame, out_dir: Path) -> None:
     corr = df[NUMERIC_COLUMNS].corr()
-    plt.figure(figsize=(9, 7))
+    plt.figure(figsize=(10, 8))
     sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", square=True)
     plt.title("Correlation Heatmap")
     plt.tight_layout()
@@ -87,12 +96,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--input",
-        default="cleaned_required_columns.csv",
+        default="career-guidance-ml\\all_year.xlsx",
         help="Input CSV/Excel path. Can be raw data or already cleaned data.",
     )
     parser.add_argument(
         "--output-dir",
-        default="analysis_outputs",
+        default="analysis_outputs1",
         help="Folder where analysis files and plots will be saved",
     )
     args = parser.parse_args()
